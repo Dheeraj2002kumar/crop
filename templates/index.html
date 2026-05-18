@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioShield - Smart Crop Disease Diagnostic Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Responsive Glowing Header -->
+    <header>
+        <a href="/" class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C9,20.88 12.19,20.1 14.28,17.22C17.2,13.22 17,8 17,8M12,17C9.79,17 8,15.21 8,13C8,10.79 9.79,9 12,9C14.21,9 16,10.79 16,13C16,15.21 14.21,17 12,17M20,2A4,4 0 0,0 16,6C16,8.21 17.79,10 20,10A4,4 0 0,0 24,6A4,4 0 0,0 20,2M20,8A2,2 0 0,1 18,6A2,2 0 0,1 20,4A2,2 0 0,1 22,6A2,2 0 0,1 20,8Z" />
+                </svg>
+            </div>
+            <span class="logo-text">BioShield AI</span>
+        </a>
+        
+        <!-- Live Model Connection Status -->
+        <div class="status-badge {% if not model_loaded %}simulation{% endif %}">
+            <span class="status-pulse"></span>
+            <span class="status-label">
+                {% if model_loaded %}
+                    Deep Learning Engine Online
+                {% else %}
+                    Simulation Mode (Model Loading...)
+                {% endif %}
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main>
+        
+        <!-- Diagnostic Setup (Left Column) -->
+        <div class="card">
+            <h2 class="card-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" style="fill: var(--primary);">
+                    <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+                </svg>
+                Leaf Scan Analyzer
+            </h2>
+            <p class="card-subtitle">Upload a leaf photograph or select one of our pre-loaded samples to scan for crop diseases instantly.</p>
+            
+            <!-- Diagnostic Mode Selector -->
+            <div class="mode-container" style="margin-bottom: 1.5rem; display: flex; gap: 0.75rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 0.35rem; border-radius: 0.75rem;">
+                <button id="mode-sim" class="mode-tab active" style="flex: 1; border: none; font-family: 'Outfit', sans-serif; font-weight: 600; padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; transition: var(--transition-smooth); background: var(--primary-gradient); color: var(--text-light); box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);">
+                    Showcase Simulation
+                </button>
+                <button id="mode-real" class="mode-tab" style="flex: 1; border: none; font-family: 'Outfit', sans-serif; font-weight: 600; padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; transition: var(--transition-smooth); background: transparent; color: var(--text-muted);">
+                    AI GPU Engine
+                </button>
+            </div>
+            
+            <!-- Upload Container -->
+            <div class="upload-zone" id="drop-zone">
+                <div class="upload-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z" />
+                    </svg>
+                </div>
+                <h3 class="upload-title">Drag & drop your leaf image</h3>
+                <p class="upload-desc">or click here to browse local storage</p>
+                <p class="upload-limit">Supports JPG, PNG, JPEG up to 10MB</p>
+                <input type="file" id="file-input" accept="image/*">
+            </div>
+
+            <!-- Upload Preview Area -->
+            <div class="preview-container" id="preview-area">
+                <img src="" alt="Upload Preview" class="preview-image" id="preview-img">
+                <div class="preview-overlay">
+                    <div class="preview-info">
+                        <p class="meta-label" id="file-name">leaf_sample.jpg</p>
+                        <p class="meta-value" id="file-size">1.2 MB</p>
+                    </div>
+                    <button class="remove-btn" id="remove-btn">Remove Leaf</button>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <button class="analyze-btn" id="analyze-btn" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" style="fill: currentColor;">
+                    <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"/>
+                </svg>
+                Run Bio-Diagnostics
+            </button>
+
+            <!-- Quick Samples Grid -->
+            <div style="margin-top: 2rem;">
+                <h4 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    Quick Diagnostic Samples
+                </h4>
+                <div class="samples-grid">
+                    <!-- Sample 1 -->
+                    <div class="sample-card" data-class="Tomato_healthy">
+                        <img src="/get-sample-thumbnail/Tomato_healthy" alt="Tomato Healthy" class="sample-thumbnail">
+                        <div class="sample-label">Tomato Healthy</div>
+                    </div>
+                    <!-- Sample 2 -->
+                    <div class="sample-card" data-class="Potato___Early_blight">
+                        <img src="/get-sample-thumbnail/Potato___Early_blight" alt="Potato Early Blight" class="sample-thumbnail">
+                        <div class="sample-label">Potato Blight</div>
+                    </div>
+                    <!-- Sample 3 -->
+                    <div class="sample-card" data-class="Pepper__bell___Bacterial_spot">
+                        <img src="/get-sample-thumbnail/Pepper__bell___Bacterial_spot" alt="Pepper Bacterial Spot" class="sample-thumbnail">
+                        <div class="sample-label">Pepper Spot</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnostic Output (Right Column) -->
+        <div class="card results-card">
+            
+            <!-- Placeholder Screen -->
+            <div class="results-placeholder" id="results-placeholder">
+                <div class="placeholder-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12,3A9,9 0 0,0 3,12A9,9 0 0,0 12,21A9,9 0 0,0 21,12A9,9 0 0,0 12,3M12,5A7,7 0 0,1 19,12A7,7 0 0,1 12,19A7,7 0 0,1 5,12A7,7 0 0,1 12,5M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
+                    </svg>
+                </div>
+                <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem;">Awaiting Analysis</h3>
+                <p class="placeholder-text">Once you load an image and click the diagnostic button, the AI diagnostic results will populate here.</p>
+            </div>
+
+            <!-- Loader Screen -->
+            <div class="loader-container" id="results-loader">
+                <div class="loader-ring"></div>
+                <h3 class="loader-text">Analyzing Foliar Cellular Grid...</h3>
+                <p class="loader-status" id="loader-progress">Pre-processing image pixels...</p>
+            </div>
+
+            <!-- Rich Diagnostic Report Card -->
+            <div class="diagnostic-report" id="diagnostic-report">
+                
+                <div class="report-header">
+                    <!-- Dynamic Health/Severity Badge -->
+                    <span class="report-badge" id="report-badge" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.25);">
+                        Disease Detected
+                    </span>
+                    <h2 class="disease-title" id="report-title">Tomato - Late Blight</h2>
+                    
+                    <!-- Confidence Bar -->
+                    <div style="margin-top: 1rem;">
+                        <p class="meta-label" style="margin-bottom: 0.35rem;">AI Classifier Confidence</p>
+                        <div class="confidence-bar-container">
+                            <div class="confidence-bar-fill" id="report-confidence-fill" style="width: 96.5%;"></div>
+                            <span class="confidence-text" id="report-confidence-text">96.50%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Grid Info -->
+                <div class="report-grid">
+                    <div class="meta-item">
+                        <p class="meta-label">Pathogen Category</p>
+                        <p class="meta-value" id="report-type">Oomycete Infection</p>
+                    </div>
+                    <div class="meta-item">
+                        <p class="meta-label">Outbreak Urgency</p>
+                        <p class="meta-value" id="report-severity" style="color: var(--danger);">Critical</p>
+                    </div>
+                </div>
+
+                <!-- Symptom List -->
+                <div class="report-section">
+                    <h4 class="report-section-title">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+                        </svg>
+                        Identified Symptoms
+                    </h4>
+                    <ul class="report-list" id="report-symptoms">
+                        <li class="report-list-item">Water-soaked, dark green or black lesions starting at leaf tips.</li>
+                        <li class="report-list-item">White fuzzy spore growth on undersides in wet environments.</li>
+                    </ul>
+                </div>
+
+                <!-- Scientific Description -->
+                <div class="report-section">
+                    <h4 class="report-section-title">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                        </svg>
+                        Pathogen Description
+                    </h4>
+                    <div class="report-description" id="report-desc">
+                        Late blight is caused by the destructive water mold Phytophthora infestans. It targets all above-ground crop sections causing massive plant rot inside days.
+                    </div>
+                </div>
+
+                <!-- Care / Treatment Box -->
+                <div class="report-section" style="margin-bottom: 0;">
+                    <h4 class="report-section-title">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12,3L1,9L12,15L21,10.09V17H23V9L12,3M12,5.18L18.82,8.9L12,12.62L5.18,8.9L12,5.18M12,16C8.84,16 6.16,14.28 4.79,11.75L3,12.75C4.78,16 8.14,18 12,18C15.86,18 19.22,16 21,12.75L19.21,11.75C17.84,14.28 15.16,16 12,16Z"/>
+                        </svg>
+                        Clinical Treatment Plan
+                    </h4>
+                    <div class="treatment-box danger-box" id="report-treatment">
+                        Immediately prune and destroy infected plant debris. Treat with liquid copper protectant fungicides early, and avoid over-watering of leaf structures.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Custom Frontend Javascript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
